@@ -7,29 +7,43 @@ export default function BookList() {
   const { filterText, searchText } = useSelector((state) => state.filter);
   const { data: books, isLoading, isError } = useGetBooksQuery();
 
-  const filterByStatus = (book) => {
-    switch (filterText) {
-      case 'featured':
-        return book.featured;
-      case 'all':
-        return true;
-      default:
-        return true;
+  // const filterByStatus = (book) => {
+  //   switch (filterText) {
+  //     case 'featured':
+  //       return book.featured;
+  //     case 'all':
+  //       return true;
+  //     default:
+  //       return true;
+  //   }
+  // };
+
+  // // filter by name
+  // const filterByName = (book) => {
+  //   if (book.name.toLowerCase().indexOf(searchText.toLowerCase()) !== -1) {
+  //     return true;
+  //   } else if (searchText === '') {
+  //     return true;
+  //   }
+  //   return false;
+  // }
+
+  // using reduce method
+  const finalizedBooks = books?.reduce((prev, curr) => {
+    if (curr.name.toLowerCase().includes(searchText.toLowerCase())) {
+      if (filterText === 'featured' && curr.featured) {
+        prev.push(curr);
+      } else if (filterText !== 'featured') {
+        prev.push(curr);
+      }
     }
-  };
+    // sort
+    // prev.sort((a, b) => b.id - a.id);
+    // filter
+    return prev;
+  }, [])
 
-  // filter by name
-  const filterByName = (book) => {
-    if (book.name.toLowerCase().indexOf(searchText.toLowerCase()) !== -1) {
-      return true;
-    } else if (searchText === '') {
-      return true;
-    }
-    return false;
-  }
-
-
-  // let's decide what will be render
+  // let's decide what will render
   let content = null;
 
   if (isLoading) content = <Loading />
@@ -52,7 +66,8 @@ export default function BookList() {
 
   if (!isLoading && !isError && books?.length > 0) {
     content = (
-      content = books.filter(filterByStatus).filter(filterByName).map((book) => <Book key={book.id} book={book} />)
+      // content = books.filter(filterByStatus).filter(filterByName).map((book) => <Book key={book.id} book={book} />)
+      content = finalizedBooks.map((book) => <Book key={book.id} book={book} />)
     )
   };
 
